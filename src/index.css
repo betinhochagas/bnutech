@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@layer base {
+  :root {
+    /* BNU Tech Design System */
+    --background: 216 75% 3%;
+    --foreground: 0 0% 99%;
+    
+    --card: 210 43% 11%;
+    --card-foreground: 0 0% 99%;
+    
+    --popover: 210 43% 11%;
+    --popover-foreground: 0 0% 99%;
+    
+    --primary: 191 58% 59%;
+    --primary-foreground: 216 75% 3%;
+    
+    --secondary: 232 43% 51%;
+    --secondary-foreground: 0 0% 99%;
+    
+    --accent: 262 48% 37%;
+    --accent-foreground: 0 0% 99%;
+    
+    --muted: 186 37% 17%;
+    --muted-foreground: 191 30% 70%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 99%;
+    
+    --border: 186 37% 20%;
+    --input: 186 37% 20%;
+    --ring: 191 58% 59%;
+    
+    --radius: 0.75rem;
+    
+    /* Custom tokens */
+    --surface-800: 210 43% 11%;
+    --gradient-primary: linear-gradient(135deg, hsl(191 58% 59%) 0%, hsl(232 43% 51%) 50%, hsl(262 48% 37%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(216 75% 3%) 0%, hsl(210 43% 8%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(210 43% 14%) 0%, hsl(210 43% 9%) 100%);
+    --shadow-glow: 0 0 40px hsla(191, 58%, 59%, 0.15);
+    --shadow-card: 0 8px 32px hsla(0, 0%, 0%, 0.3);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+  }
+
+  /* Focus visible for accessibility */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .gradient-border {
+    position: relative;
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--gradient-primary);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-md border border-border/50;
+    background: linear-gradient(145deg, hsla(210, 43%, 14%, 0.8) 0%, hsla(210, 43%, 9%, 0.9) 100%);
+    box-shadow: var(--shadow-card);
+  }
+
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px hsla(191, 58%, 59%, 0.2); }
+    50% { box-shadow: 0 0 40px hsla(191, 58%, 59%, 0.4); }
+  }
+}
