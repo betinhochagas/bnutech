@@ -1,23 +1,18 @@
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { Phone, Mail, Clock } from 'lucide-react';
 import { ContactForm } from './ContactForm';
 
 const contactInfo = [
   {
-    icon: MapPin,
-    label: 'Endereço',
-    value: '[ENDEREÇO]',
-  },
-  {
     icon: Phone,
     label: 'WhatsApp',
-    value: '[WHATSAPP]',
-    href: 'https://wa.me/[WHATSAPP]',
+    value: '(47) 93386-8149',
+    href: 'https://wa.me/5547933868149',
   },
   {
     icon: Mail,
     label: 'E-mail',
-    value: '[EMAIL]',
-    href: 'mailto:[EMAIL]',
+    value: 'Contato@bnutech.com.br',
+    href: 'mailto:Contato@bnutech.com.br',
   },
   {
     icon: Clock,
@@ -66,14 +61,6 @@ export function Contact() {
                   </div>
                 </div>
               ))}
-            </div>
-
-            {/* Map placeholder */}
-            <div className="aspect-video rounded-xl bg-muted/30 border border-border overflow-hidden">
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                <MapPin className="h-8 w-8 mr-2" />
-                Mapa em breve
-              </div>
             </div>
           </div>
 
