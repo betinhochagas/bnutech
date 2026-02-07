@@ -7,7 +7,7 @@ const projects = [
     title: 'PetZen - Casa de Ração',
     category: 'E-commerce',
     description: 'Loja virtual completa para produtos pet com catálogo e sistema de pedidos.',
-    image: 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=600&h=400&fit=crop',
+    image: '/images/petzen.preview.png',
     tags: ['E-commerce', 'Pets', 'React'],
     link: 'https://petzen.bnutech.com.br',
   },
@@ -15,7 +15,7 @@ const projects = [
     title: 'Pé na Pista Locações',
     category: 'Sistema Web',
     description: 'Plataforma de locação de veículos para motoristas de aplicativo em Jaraguá do Sul/SC.',
-    image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=600&h=400&fit=crop',
+    image: '/images/penapista-preview.png',
     tags: ['Locação', 'Mobilidade', 'Landing Page'],
     link: 'https://penapista.bnutech.com.br',
   },
@@ -23,7 +23,7 @@ const projects = [
     title: 'RV Car Locações',
     category: 'Desenvolvimento Web',
     description: 'Site de locação de veículos e investimento em frotas para motoristas de app em Blumenau/SC.',
-    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&h=400&fit=crop',
+    image: '/images/rvcar-preview.png',
     tags: ['Locação', 'Investimentos', 'SEO'],
     link: 'https://www.rvcarlocacoes.com.br',
   },
@@ -32,44 +32,86 @@ const projects = [
 interface ProjectCardProps {
   project: typeof projects[0];
   index: number;
+  isActive: boolean;
+  anyModalOpen: boolean;
+  onOpenPreview: () => void;
+  onClosePreview: () => void;
 }
 
-function ProjectCard({ project, index }: ProjectCardProps) {
-  const [showPreview, setShowPreview] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
+function ProjectCard({ project, index, isActive, anyModalOpen, onOpenPreview, onClosePreview }: ProjectCardProps) {
   const [iframeError, setIframeError] = useState(false);
   const [errorDetails, setErrorDetails] = useState<string>('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hoverRef = useRef(false);
 
   const handleMouseEnter = () => {
+    // CRITICAL: Só abre se nenhum modal está aberto
+    if (anyModalOpen) {
+      return; // Ignora hover quando qualquer modal está aberto
+    }
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
-    setIsHovering(true);
-    setShowPreview(true);
+    hoverRef.current = true;
+    if (!isActive) {
+      onOpenPreview();
+    }
   };
 
-  const handleMouseLeave = () => {
-    setIsHovering(false);
-    // Delay para fechar o modal, dando tempo do usuário mover o mouse para ele
+  const handleMouseLeave = (e: React.MouseEvent) => {
+    // CRITICAL: Não processa leave se este card tem o modal ativo
+    // O modal vai controlar o fechamento
+    if (isActive) {
+      return; // Modal ativo - deixa o modal controlar
+    }
+
+    // Verifica se realmente saiu do card (não apenas moveu entre elementos filhos)
+    const currentTarget = e.currentTarget as HTMLElement;
+    const relatedTarget = e.relatedTarget as HTMLElement;
+
+    if (relatedTarget && currentTarget.contains(relatedTarget)) {
+      return; // Ainda está dentro do card, ignora
+    }
+
+    hoverRef.current = false;
+    // Este código só executa se nenhum modal deste card está aberto
     timeoutRef.current = setTimeout(() => {
-      if (!isHovering) {
-        setShowPreview(false);
+      if (!hoverRef.current) {
+        onClosePreview();
       }
-    }, 100);
+    }, 150);
   };
 
   const handleModalMouseEnter = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
-    setIsHovering(true);
+    hoverRef.current = true;
   };
 
   const handleModalMouseLeave = () => {
-    setIsHovering(false);
-    setShowPreview(false);
+    // Quando sai do modal, fecha com um pequeno delay
+    // Isso permite mover o mouse rapidamente sem fechar acidentalmente
+    hoverRef.current = false;
+    timeoutRef.current = setTimeout(() => {
+      if (!hoverRef.current) {
+        onClosePreview();
+      }
+    }, 100); // Delay reduzido para 100ms para melhor responsividade
+  };
+
+  const handleBackdropClick = () => {
+    // Fecha imediatamente apenas quando clica no backdrop
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    hoverRef.current = false;
+    onClosePreview();
   };
 
   const handleIframeError = (e: React.SyntheticEvent<HTMLIFrameElement>) => {
@@ -79,7 +121,7 @@ function ProjectCard({ project, index }: ProjectCardProps) {
   };
 
   useEffect(() => {
-    if (showPreview && iframeRef.current) {
+    if (isActive && iframeRef.current) {
       const iframe = iframeRef.current;
 
       // Log para debug
@@ -111,7 +153,28 @@ function ProjectCard({ project, index }: ProjectCardProps) {
         clearInterval(scrollInterval);
       };
     }
-  }, [showPreview, iframeError, project.title, project.link]);
+  }, [isActive, iframeError, project.title, project.link]);
+
+  // Bloqueia scroll da página quando o modal está aberto
+  useEffect(() => {
+    if (isActive) {
+      // Salva a posição atual do scroll
+      const scrollY = window.scrollY;
+
+      // Bloqueia o scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+
+      return () => {
+        // Restaura o scroll quando o modal fecha
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isActive]);
 
   useEffect(() => {
     return () => {
@@ -122,17 +185,26 @@ function ProjectCard({ project, index }: ProjectCardProps) {
   }, []);
 
   useEffect(() => {
-    if (!showPreview) {
+    if (!isActive) {
+      // Quando modal fecha, limpa tudo
       setIframeError(false);
       setErrorDetails('');
+      hoverRef.current = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     }
-  }, [showPreview]);
+  }, [isActive]);
 
   return (
     <>
       <article
         className="group glass-card rounded-xl overflow-hidden animate-fade-in"
-        style={{ animationDelay: `${index * 0.15}s` }}
+        style={{
+          animationDelay: `${index * 0.15}s`,
+          pointerEvents: anyModalOpen ? 'none' : 'auto',
+        }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -143,6 +215,13 @@ function ProjectCard({ project, index }: ProjectCardProps) {
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
           />
+
+          {/* Badge de Preview */}
+          <div className="absolute top-3 right-3 z-10">
+            <span className="px-3 py-1 text-xs font-medium bg-primary/90 text-primary-foreground rounded-full backdrop-blur-sm shadow-lg">
+              Passe o mouse para preview
+            </span>
+          </div>
 
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4 z-10">
             <Button size="sm" variant="secondary" asChild>
@@ -175,14 +254,17 @@ function ProjectCard({ project, index }: ProjectCardProps) {
       </article>
 
       {/* Modal Preview */}
-      {showPreview && (
+      {isActive && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+          {/* Backdrop - fecha apenas quando clica */}
+          <div
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            onClick={handleBackdropClick}
+          />
 
           {/* Modal Content */}
           <div
-            className="relative w-full max-w-5xl h-[80vh] glass-card rounded-2xl overflow-hidden shadow-2xl"
+            className="relative w-full max-w-4xl h-[70vh] glass-card rounded-2xl overflow-hidden shadow-2xl"
             onMouseEnter={handleModalMouseEnter}
             onMouseLeave={handleModalMouseLeave}
           >
@@ -245,6 +327,8 @@ function ProjectCard({ project, index }: ProjectCardProps) {
 }
 
 export function Portfolio() {
+  const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null);
+
   return (
     <section id="portfolio" className="py-20 md:py-28">
       <div className="container">
@@ -260,7 +344,15 @@ export function Portfolio() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project, index) => (
-            <ProjectCard key={project.title} project={project} index={index} />
+            <ProjectCard
+              key={project.title}
+              project={project}
+              index={index}
+              isActive={activeProjectIndex === index}
+              anyModalOpen={activeProjectIndex !== null}
+              onOpenPreview={() => setActiveProjectIndex(index)}
+              onClosePreview={() => setActiveProjectIndex(null)}
+            />
           ))}
         </div>
 
