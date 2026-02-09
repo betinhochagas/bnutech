@@ -266,7 +266,7 @@ const ConsultorEmail = () => {
           name="keywords"
           content="e-mail corporativo, e-mail profissional, webmail empresarial, e-mail domínio próprio, hospedagem de email"
         />
-        <link rel="canonical" href="https://www.bnutech.com.br/consultoria" />
+        <link rel="canonical" href="https://www.bnutech.com.br/email" />
       </Helmet>
 
       <Navbar />
