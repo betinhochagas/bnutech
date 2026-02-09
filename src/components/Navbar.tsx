@@ -15,6 +15,10 @@ const navLinks = [
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  
+  // Detecta se está na página principal ou em outra página
+  const isHomePage = window.location.pathname === '/';
+  const linkPrefix = isHomePage ? '' : '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,7 +35,7 @@ export function Navbar() {
       }`}
     >
       <nav className="container flex items-center justify-between">
-        <a href="#home" className="flex items-center gap-2" aria-label="BNU Tech - Página inicial">
+        <a href={isHomePage ? "#home" : "/"} className="flex items-center gap-2" aria-label="BNU Tech - Página inicial">
           <img src={logo} alt="BNU Tech Logo" className="h-12 w-auto" />
         </a>
 
@@ -40,7 +44,7 @@ export function Navbar() {
           {navLinks.map((link) => (
             <li key={link.href}>
               <a
-                href={link.href}
+                href={`${linkPrefix}${link.href}`}
                 className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors focus-visible:text-primary"
               >
                 {link.label}
@@ -56,7 +60,7 @@ export function Navbar() {
             </a>
           </Button>
           <Button size="sm" asChild className="glow-effect">
-            <a href="#contato">Solicitar Orçamento</a>
+            <a href={`${linkPrefix}#contato`}>Solicitar Orçamento</a>
           </Button>
         </div>
 
@@ -78,7 +82,7 @@ export function Navbar() {
             {navLinks.map((link) => (
               <li key={link.href}>
                 <a
-                  href={link.href}
+                  href={`${linkPrefix}${link.href}`}
                   className="block text-foreground hover:text-primary transition-colors py-2"
                   onClick={() => setIsOpen(false)}
                 >
@@ -94,7 +98,7 @@ export function Navbar() {
               </a>
             </Button>
             <Button size="sm" asChild>
-              <a href="#contato" onClick={() => setIsOpen(false)}>
+              <a href={`${linkPrefix}#contato`} onClick={() => setIsOpen(false)}>
                 Solicitar Orçamento
               </a>
             </Button>
